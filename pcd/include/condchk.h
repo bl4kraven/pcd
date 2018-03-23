@@ -52,7 +52,7 @@ struct rule_t;
 /**************************************************************************/
 typedef PCD_status_e (*condCheckFunc)( struct rule_t *rule );
 
-#define PCD_COND_MAX_SIZE   32
+#define PCD_COND_MAX_SIZE   64
 
 /* List of all start condition keywords */
 #define PCD_START_COND_KEYWORDS \
