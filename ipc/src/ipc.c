@@ -122,7 +122,7 @@
  *  \brief The path for the IPC sockets (platform depended - can be overridden by the makefile)
  */
 #ifndef IPC_SOCKET_PATH
-#define IPC_SOCKET_PATH     "/var/tmp"
+#define IPC_SOCKET_PATH     "/tmp"
 #endif /* IPC_SOCKET_PATH */
 
 /*! \def IPC_UNIX_PATH_MAX
