@@ -57,6 +57,7 @@
 #include "schedtype.h"
 #include "parser.h"
 #include "pcd.h"
+#include <limits.h>
 
 /**************************************************************************/
 /*      LOCAL DEFINITIONS AND VARIABLES                                   */
@@ -223,27 +224,17 @@ static int32_t PCD_parser_update_parse_status( parserKeywords_e kwId )
     if ( !kwPtr->name )
         return( -1 );
 
-    PCD_DEBUG_PRINTF( "%s: kwPtr->name=%s", __FUNCTION__, kwPtr->name );
-
-    if ( strcmp( kwPtr->name, keywordHandlersList[ kwId ].name ) )
+    PCD_DEBUG_PRINTF( "%s: kwPtr->name=%s %s %d", __FUNCTION__, kwPtr->name ,keywordHandlersList[ kwId ].name,
+                                                   strcmp( kwPtr->name, keywordHandlersList[ kwId ].name ));
+    while ( 1 )
     {
-        while ( 1 )
-        {
-            PCD_DEBUG_PRINTF( "%s: Inside while, kwPtr->name=%s, kwPtr->mandatory_flag=%d", __FUNCTION__, kwPtr->name, kwPtr->mandatory_flag );
+        if ( strcmp( kwPtr->name, keywordHandlersList[ kwId ].name ) == 0 )
+            break;
 
-            if ( kwPtr->mandatory_flag )
-            {
-                PCD_PRINTF_STDERR( "Missing input: expected \"%s\" but found \"%s\" at line# %d",
-                                   kwPtr->name, keywordHandlersList[ kwId ].name, lineNumber );
-                break;
-            }
-
-            kwPtr++;
-            if ( !kwPtr->name )
-                kwPtr = &keywordHandlersList[0];
-        }
-
-        return( -1 );
+        PCD_DEBUG_PRINTF( "%s: Inside while, kwPtr->name=%s, kwPtr->mandatory_flag=%d", __FUNCTION__, kwPtr->name, kwPtr->mandatory_flag );
+        kwPtr++;
+        if ( !kwPtr->name )
+            return -1;
     }
 
     readParseStatus |= kwPtr->parse_flag;
@@ -294,10 +285,16 @@ static int32_t PCD_parser_write_rule_to_db( parserKeywords_e kwId )
     PCD_FUNC_ENTER_PRINT
 
     if ( readParseStatus != writableParseStatus )
+    {
+        PCD_PRINTF_STDERR( "%s: readParseStatus != writableParseStatus %x %x", __FUNCTION__, readParseStatus, writableParseStatus);
         return( -1 );
+    }
 
     if ( PCD_parser_add_rule( &rule ) )
+    {
+        PCD_PRINTF_STDERR( "%s: add rule fail", __FUNCTION__);
         return( -1 );
+    }
 
     PCD_parser_clear_parse_status( kwId );
 
@@ -394,7 +391,7 @@ static int32_t PCD_parser_read_config( const char *filename, bool_t toplevel )
             {
                 if ( kwPtr->handler( line ) )
                 {
-                    PCD_PRINTF_STDERR( "Unable to parse %s", line );
+                    PCD_PRINTF_STDERR( "Unable to parse key:%s %s", kwPtr->name, line );
                     PCD_parser_print_error( kwPtr );
                     ret_val = -1;
                     goto read_config_exit;
@@ -930,6 +927,9 @@ static int32_t PCD_parser_handle_FAILURE_INTERVAL( char *line )
 {
     PCD_FUNC_ENTER_PRINT
 
+    if ( PCD_parser_update_parse_status( PCD_PARSER_KEYWORD_FAILURE_INTERVAL) )
+        return(-1);
+
     /* Check if the value is a string or number. If it is a string, then
      * error */
     char *linecopy = line;
@@ -964,6 +964,9 @@ static int32_t PCD_parser_handle_FAILURE_INTERVAL( char *line )
 static int32_t PCD_parser_handle_FAILURE_RESET_COUNT( char *line )
 {
     PCD_FUNC_ENTER_PRINT
+
+    if ( PCD_parser_update_parse_status( PCD_PARSER_KEYWORD_FAILURE_RESET_COUNT) )
+        return(-1);
 
     /* Check if the value is a string or number. If it is a string, then
      * error */
