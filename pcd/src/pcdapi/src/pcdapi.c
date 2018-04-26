@@ -525,9 +525,10 @@ static void PCD_exception_default_handler(int32_t signo, siginfo_t *info, void *
     exception_t exception;
     int32_t fd1, fd2, bt;
     int32_t total = sizeof( exception_t );
-    int32_t size, i;
-    void *             array[16];
-    char **            messages;
+    int i;
+    //int32_t size, i;
+    //void *             array[16];
+    //char **            messages;
 
     /* Get platform specific registers */
 #if defined(CONFIG_PCD_PLATFORM_ARM) || defined(CONFIG_PCD_PLATFORM_X86) \
@@ -587,32 +588,32 @@ static void PCD_exception_default_handler(int32_t signo, siginfo_t *info, void *
     exception.caller_address = (void*)ctx->uc_mcontext.regs->nip;
 #endif
 
-    size = backtrace(array,16);
-    /* overwrite sigaction with caller's address */
-    array[1] = exception.caller_address;
-    messages = backtrace_symbols(array, size);
+    //size = backtrace(array,16);
+    ///* overwrite sigaction with caller's address */
+    //array[1] = exception.caller_address;
+    //messages = backtrace_symbols(array, size);
 
-    /* Create a temporary file which will be available after the process is dead */
-    bt = open( btTmpFile, O_CREAT | O_WRONLY | O_SYNC, S_IRWXU | S_IRWXG );
+    ///* Create a temporary file which will be available after the process is dead */
+    //bt = open( btTmpFile, O_CREAT | O_WRONLY | O_SYNC, S_IRWXU | S_IRWXG );
 
-    if ( bt > 0 )
-    {
-        u_int8_t buf_bt[ 512 ];
-        int32_t writeBytes = 0;
+    //if ( bt > 0 )
+    //{
+    //    u_int8_t buf_bt[ 512 ];
+    //    int32_t writeBytes = 0;
 
-        /* skip first stack frame (points here) */
-		for (i = 1; i < size && messages != NULL; ++i)
-		{
-			writeBytes = snprintf(buf_bt,511, "[bt]: (%d) %s\n", i, messages[i]);
-            /* Best effort write */
-            if( write( bt, buf_bt, writeBytes ) <= 0 )
-				break;
-		}
+    //    /* skip first stack frame (points here) */
+	//	for (i = 1; i < size && messages != NULL; ++i)
+	//	{
+	//		writeBytes = snprintf((char *)buf_bt,511, "[bt]: (%d) %s\n", i, messages[i]);
+    //        /* Best effort write */
+    //        if( write( bt, buf_bt, writeBytes ) <= 0 )
+	//			break;
+	//	}
 
-        close(bt);
-    }
+    //    close(bt);
+    //}
 
-    free(messages);
+    //free(messages);
 
     fd1 = open( mapsFile, O_RDONLY );
 

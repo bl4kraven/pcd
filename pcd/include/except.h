@@ -40,7 +40,8 @@
 /*      INCLUDES                                                          */
 /**************************************************************************/
 #ifdef CONFIG_PCD_PLATFORM_ARM /* ARM registers */
-#include <asm/sigcontext.h>
+//#include <asm/sigcontext.h>
+#include <sys/ucontext.h>
 #endif
 
 #ifdef CONFIG_PCD_PLATFORM_X86 /* x86 processor context */

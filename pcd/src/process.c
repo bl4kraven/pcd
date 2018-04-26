@@ -133,111 +133,112 @@ char *strsignal( int );
 static void PCD_process_terminate(int signo, siginfo_t *info, void *context)
 {
     const char msg2[]= "pcd: Terminating PCD, rebooting system...\n";
-    int32_t size, i;
-    void *             array[16];
-    char **            messages;
+    int i;
+    //int32_t size, i;
+    //void *             array[16];
+    //char **            messages;
 
     /* In case the PCD is terminated, reboot the system. */
-    if ( signo != SIGTERM )
-    {
-        const char msg1[]= "pcd: Caught fault signal.\n";
-        exception_t exception;
-        int32_t fd;
-
-    /* Get platform specific registers */
-#if defined(CONFIG_PCD_PLATFORM_ARM) || defined(CONFIG_PCD_PLATFORM_X86) \
-    || defined(CONFIG_PCD_PLATFORM_MIPS) || defined(CONFIG_PCD_PLATFORM_X64) \
-    || defined(CONFIG_PCD_PLATFORM_POWERPC)
-        ucontext_t *ctx = (ucontext_t *)context;
-#endif
-        char *procName = "pcd";
-        const char msg3[]= "pcd: Wrote exception information.\n";
-
-        /* Display an error message */
-        i = write( STDERR_FILENO, msg1, sizeof(msg1) );
-
-        /* Prepare a self exception file in case the PCD has crashed (Could never happen :-)) */
-        exception.magic = PCD_EXCEPTION_MAGIC;
-
-        /* Copy process name. Avoid using strcpy which is not safe in our condition */
-        for ( i=0; i < 4; i++ )
-            exception.process_name[ i ] = procName[ i ];
-
-        for ( i=4; i < PCD_EXCEPTION_MAX_PROCESS_NAME; i++ )
-            exception.process_name[ i ] = 0;
-
-        /* Setup fault information */
-        exception.process_id = getpid();
-        exception.signal_code = info->si_code;
-        exception.signal_number = signo;
-        exception.signal_errno = info->si_errno;
-        exception.handler_errno = errno;
-        exception.fault_address = info->si_addr;
-        clock_gettime(CLOCK_REALTIME, &exception.time);
-#ifdef CONFIG_PCD_PLATFORM_ARM /* ARM registers */
-        exception.regs = ctx->uc_mcontext;
-#endif
-
-        /* X86 processor context */ /* MIPS registers */
-#if defined(CONFIG_PCD_PLATFORM_X86) || defined(CONFIG_PCD_PLATFORM_MIPS)
-        exception.uc_mctx = ctx->uc_mcontext; 
-#endif
-        /* X64 registers */
-#if defined(CONFIG_PCD_PLATFORM_X64)
-        exception.uc_mcontext = ctx->uc_mcontext; 
-#endif
-        /* PowerPC registers */
-#if defined(CONFIG_PCD_PLATFORM_POWERPC)
-        exception.uc_mcontext = *(ctx->uc_mcontext.uc_regs);
-#endif
-
-#ifdef CONFIG_PCD_PLATFORM_ARM /* ARM registers */
-		exception.caller_address = (void*)ctx->uc_mcontext.arm_pc;
-#endif
-
-#if defined(CONFIG_PCD_PLATFORM_X86)
-		exception.caller_address = (void*)ctx->uc_mcontext.gregs[REG_EIP];
-#endif
-
-#if defined(CONFIG_PCD_PLATFORM_MIPS)
-		exception.caller_address = (void*)ctx->uc_mctx.pc;
-#endif
-
-#if defined(CONFIG_PCD_PLATFORM_X64) /* x64 Registers */
-		exception.caller_address = (void*)ctx->uc_mcontext.gregs[REG_RIP];
-#endif
-
-#if defined(CONFIG_PCD_PLATFORM_POWERPC) /* PowerPC Registers */
-		exception.caller_address = (void*)ctx->uc_mcontext.regs->nip;
-#endif
-
-	    size = backtrace(array,16);
-	    /* overwrite sigaction with caller's address */
-	    array[1] = exception.caller_address;
-	    messages = backtrace_symbols(array, size);
-
-	    /* Open the self exception file */
-        fd = open( CONFIG_PCD_PROCESS_SELF_EXCEPTION_DIRECTORY "/" CONFIG_PCD_PROCESS_SELF_EXCEPTION_FILE, O_CREAT | O_WRONLY | O_SYNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
-
-        if ( fd > 0 )
-        {
-            u_int8_t buf_bt[ 512 ];
-            int32_t writeBytes = 0;
-
-            /* Write information for debug */
-            i = write( fd, &exception, sizeof( exception ) );
-            /* skip first stack frame (points here) */
-    		for (i = 1; i < size && messages != NULL; ++i)
-    		{
-    			writeBytes = snprintf(buf_bt,511, "[bt]: (%d) %s\n", i, messages[i]);
-                /* Best effort write */
-                if( write( fd, buf_bt, writeBytes ) <= 0 )
-    				break;
-    		}
-            close(fd);
-            i = write( STDERR_FILENO, msg3, sizeof( msg3) );
-        }
-    }
+//    if ( signo != SIGTERM )
+//    {
+//        const char msg1[]= "pcd: Caught fault signal.\n";
+//        exception_t exception;
+//        int32_t fd;
+//
+//    /* Get platform specific registers */
+//#if defined(CONFIG_PCD_PLATFORM_ARM) || defined(CONFIG_PCD_PLATFORM_X86) \
+//    || defined(CONFIG_PCD_PLATFORM_MIPS) || defined(CONFIG_PCD_PLATFORM_X64) \
+//    || defined(CONFIG_PCD_PLATFORM_POWERPC)
+//        ucontext_t *ctx = (ucontext_t *)context;
+//#endif
+//        char *procName = "pcd";
+//        const char msg3[]= "pcd: Wrote exception information.\n";
+//
+//        /* Display an error message */
+//        i = write( STDERR_FILENO, msg1, sizeof(msg1) );
+//
+//        /* Prepare a self exception file in case the PCD has crashed (Could never happen :-)) */
+//        exception.magic = PCD_EXCEPTION_MAGIC;
+//
+//        /* Copy process name. Avoid using strcpy which is not safe in our condition */
+//        for ( i=0; i < 4; i++ )
+//            exception.process_name[ i ] = procName[ i ];
+//
+//        for ( i=4; i < PCD_EXCEPTION_MAX_PROCESS_NAME; i++ )
+//            exception.process_name[ i ] = 0;
+//
+//        /* Setup fault information */
+//        exception.process_id = getpid();
+//        exception.signal_code = info->si_code;
+//        exception.signal_number = signo;
+//        exception.signal_errno = info->si_errno;
+//        exception.handler_errno = errno;
+//        exception.fault_address = info->si_addr;
+//        clock_gettime(CLOCK_REALTIME, &exception.time);
+//#ifdef CONFIG_PCD_PLATFORM_ARM /* ARM registers */
+//        exception.regs = ctx->uc_mcontext;
+//#endif
+//
+//        /* X86 processor context */ /* MIPS registers */
+//#if defined(CONFIG_PCD_PLATFORM_X86) || defined(CONFIG_PCD_PLATFORM_MIPS)
+//        exception.uc_mctx = ctx->uc_mcontext; 
+//#endif
+//        /* X64 registers */
+//#if defined(CONFIG_PCD_PLATFORM_X64)
+//        exception.uc_mcontext = ctx->uc_mcontext; 
+//#endif
+//        /* PowerPC registers */
+//#if defined(CONFIG_PCD_PLATFORM_POWERPC)
+//        exception.uc_mcontext = *(ctx->uc_mcontext.uc_regs);
+//#endif
+//
+//#ifdef CONFIG_PCD_PLATFORM_ARM /* ARM registers */
+//		exception.caller_address = (void*)ctx->uc_mcontext.arm_pc;
+//#endif
+//
+//#if defined(CONFIG_PCD_PLATFORM_X86)
+//		exception.caller_address = (void*)ctx->uc_mcontext.gregs[REG_EIP];
+//#endif
+//
+//#if defined(CONFIG_PCD_PLATFORM_MIPS)
+//		exception.caller_address = (void*)ctx->uc_mctx.pc;
+//#endif
+//
+//#if defined(CONFIG_PCD_PLATFORM_X64) /* x64 Registers */
+//		exception.caller_address = (void*)ctx->uc_mcontext.gregs[REG_RIP];
+//#endif
+//
+//#if defined(CONFIG_PCD_PLATFORM_POWERPC) /* PowerPC Registers */
+//		exception.caller_address = (void*)ctx->uc_mcontext.regs->nip;
+//#endif
+//
+//	    size = backtrace(array,16);
+//	    /* overwrite sigaction with caller's address */
+//	    array[1] = exception.caller_address;
+//	    messages = backtrace_symbols(array, size);
+//
+//	    /* Open the self exception file */
+//        fd = open( CONFIG_PCD_PROCESS_SELF_EXCEPTION_DIRECTORY "/" CONFIG_PCD_PROCESS_SELF_EXCEPTION_FILE, O_CREAT | O_WRONLY | O_SYNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
+//
+//        if ( fd > 0 )
+//        {
+//            u_int8_t buf_bt[ 512 ];
+//            int32_t writeBytes = 0;
+//
+//            /* Write information for debug */
+//            i = write( fd, &exception, sizeof( exception ) );
+//            /* skip first stack frame (points here) */
+//    		for (i = 1; i < size && messages != NULL; ++i)
+//    		{
+//    			writeBytes = snprintf(buf_bt,511, "[bt]: (%d) %s\n", i, messages[i]);
+//                /* Best effort write */
+//                if( write( fd, buf_bt, writeBytes ) <= 0 )
+//    				break;
+//    		}
+//            close(fd);
+//            i = write( STDERR_FILENO, msg3, sizeof( msg3) );
+//        }
+//    }
 
     /* Display reboot message */
     i = write( STDERR_FILENO, msg2, sizeof(msg2) );
